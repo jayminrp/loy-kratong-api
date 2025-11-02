@@ -8,6 +8,14 @@ def create_kratong(db: Session, kratong_in: schemas.KratongCreate):
         print(f"⚠️  Kratong with ID {kratong_in.id} already exists, skipping duplicate")
         return existing
     
+    # Check if we need to delete the oldest kratong (when count > 10)
+    kratong_count = count_kratongs(db)
+    if kratong_count >= 10:
+        oldest_kratong = get_oldest_kratong(db)
+        if oldest_kratong:
+            delete_kratong(db, oldest_kratong.id)
+            print(f"✓ Deleted oldest kratong (ID={oldest_kratong.id}) to maintain limit of 10")
+    
     db_item = models.Kratong(
         id=kratong_in.id,
         owner_name=kratong_in.ownerName,
@@ -28,3 +36,25 @@ def list_kratongs(db: Session):
         .order_by(models.Kratong.created_at.desc())
         .all()
     )
+
+def delete_kratong(db: Session, kratong_id: str):
+    """Delete a kratong by ID"""
+    kratong = db.query(models.Kratong).filter(models.Kratong.id == kratong_id).first()
+    if kratong:
+        db.delete(kratong)
+        db.commit()
+        print(f"✓ Deleted kratong: ID={kratong_id}")
+        return True
+    return False
+
+def get_oldest_kratong(db: Session):
+    """Get the oldest kratong (lowest created_at)"""
+    return (
+        db.query(models.Kratong)
+        .order_by(models.Kratong.created_at.asc())
+        .first()
+    )
+
+def count_kratongs(db: Session):
+    """Count total number of kratongs"""
+    return db.query(models.Kratong).count()

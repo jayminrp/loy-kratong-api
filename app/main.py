@@ -121,3 +121,16 @@ def create_kratong(kratong_in: schemas.KratongCreate, db: Session = Depends(data
     except Exception as e:
         print(f"✗ Error creating kratong: {e}")
         raise
+
+@app.delete("/kratong/{kratong_id}")
+def delete_kratong(kratong_id: str, db: Session = Depends(database.get_db)):
+    """Delete a kratong by ID"""
+    try:
+        deleted = crud.delete_kratong(db, kratong_id)
+        if deleted:
+            return {"message": f"Kratong {kratong_id} deleted successfully", "success": True}
+        else:
+            return {"message": f"Kratong {kratong_id} not found", "success": False}
+    except Exception as e:
+        print(f"✗ Error deleting kratong: {e}")
+        raise
