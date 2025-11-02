@@ -12,6 +12,17 @@ if not raw_url:
 
 DATABASE_URL = raw_url.strip().strip('"').strip("'")
 
+# แสดง DATABASE_URL ที่ได้มา (ซ่อน password)
+masked_url = DATABASE_URL
+if "@" in masked_url:
+    parts = masked_url.split("@")
+    if len(parts) == 2:
+        user_pass = parts[0].split("://")[-1]
+        if ":" in user_pass:
+            user = user_pass.split(":")[0]
+            masked_url = masked_url.split("://")[0] + "://" + user + ":***@" + parts[1]
+print(">>> DATABASE_URL (masked):", masked_url)
+
 # force postgres:// -> postgresql+psycopg:// (for psycopg3)
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+psycopg://", 1)
@@ -19,8 +30,17 @@ elif DATABASE_URL.startswith("postgresql://"):
     # If already postgresql://, replace with postgresql+psycopg:// for psycopg3
     DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg://", 1)
 
-# 🔥 DEBUG PRINT - เช็คว่าเราใช้ URL อะไรจริงตอน runtime
-print(">>> USING DATABASE_URL =", DATABASE_URL)
+# เช็คว่าเป็น internal หรือ external URL
+if "@dpg-" in DATABASE_URL and ".render.com" not in DATABASE_URL:
+    print("⚠️  WARNING: Using INTERNAL database URL. Make sure API and DB are in same Render network.")
+    print("   If you need external access, use EXTERNAL_DATABASE_URL or add .render.com to hostname")
+elif ".render.com" in DATABASE_URL:
+    print("✓ Using EXTERNAL database URL (accessible from anywhere)")
+else:
+    print("ℹ️  Using custom database URL")
+
+# 🔥 DEBUG PRINT - เช็คว่าเราใช้ URL อะไรจริงตอน runtime (masked version)
+print(">>> Final DATABASE_URL format: postgresql+psycopg://***@[host]/[database]")
 
 engine = create_engine(DATABASE_URL)
 
