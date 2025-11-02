@@ -12,9 +12,12 @@ if not raw_url:
 
 DATABASE_URL = raw_url.strip().strip('"').strip("'")
 
-# force postgres:// -> postgresql://
+# force postgres:// -> postgresql+psycopg:// (for psycopg3)
 if DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+psycopg://", 1)
+elif DATABASE_URL.startswith("postgresql://"):
+    # If already postgresql://, replace with postgresql+psycopg:// for psycopg3
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg://", 1)
 
 # 🔥 DEBUG PRINT - เช็คว่าเราใช้ URL อะไรจริงตอน runtime
 print(">>> USING DATABASE_URL =", DATABASE_URL)

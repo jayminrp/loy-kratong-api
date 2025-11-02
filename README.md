@@ -236,8 +236,8 @@ The table will be created automatically when the API starts if it doesn't exist.
 ### Troubleshooting
 
 **Issue**: `ImportError: undefined symbol: _PyInterpreterState_Get`
-- **Solution**: This happens when using Python 3.13 with `psycopg2-binary`. Ensure Python 3.12 is used.
-  - Check `runtime.txt` contains `python-3.12`
-  - Verify Python version in Render dashboard settings
-  - Re-deploy after ensuring Python 3.12 is selected
+- **Solution**: This was fixed by switching from `psycopg2-binary` to `psycopg` (psycopg3), which supports Python 3.13.
+  - The project now uses `psycopg[binary]==3.2.3` in `requirements.txt`
+  - Database URL format uses `postgresql+psycopg://` for SQLAlchemy compatibility
+  - Works with both Python 3.12 and Python 3.13
 
