@@ -207,3 +207,37 @@ CREATE TABLE kratongs (
 
 The table will be created automatically when the API starts if it doesn't exist.
 
+## Deployment on Render
+
+### Prerequisites
+
+1. **Python Version**: The project uses Python 3.12. A `runtime.txt` file is included to specify this version.
+   - If Render still uses Python 3.13, go to your Render dashboard → Settings → Environment → and manually set Python version to 3.12
+
+2. **Environment Variables**:
+   - `DATABASE_URL` - Your PostgreSQL connection string (automatically set if using Render's PostgreSQL service)
+
+### Render Configuration
+
+1. **Build Command** (optional, Render auto-detects):
+   ```
+   pip install -r requirements.txt
+   ```
+
+2. **Start Command**:
+   ```
+   uvicorn app.main:app --host 0.0.0.0 --port $PORT
+   ```
+
+3. **Python Version**: 
+   - The `runtime.txt` file specifies `python-3.12`
+   - If deployment fails with `psycopg2` errors, verify Python 3.12 is selected in Render dashboard
+
+### Troubleshooting
+
+**Issue**: `ImportError: undefined symbol: _PyInterpreterState_Get`
+- **Solution**: This happens when using Python 3.13 with `psycopg2-binary`. Ensure Python 3.12 is used.
+  - Check `runtime.txt` contains `python-3.12`
+  - Verify Python version in Render dashboard settings
+  - Re-deploy after ensuring Python 3.12 is selected
+
